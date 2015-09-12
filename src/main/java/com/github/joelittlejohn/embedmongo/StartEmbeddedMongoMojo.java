@@ -207,6 +207,14 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
     private boolean journal;
 
     /**
+     * The storage engine to use in MongoDB
+     *
+     * @parameter expression="${embedmongo.storageEngine}"
+     * @since 0.1.14
+     */
+    private String storageEngine;
+
+    /**
      * The maven project.
      * 
      * @parameter expression="${project}"
@@ -261,12 +269,15 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
             }
             savePortToProjectProperties();
 
+            MongoCmdOptionsBuilder optionsBuilder = new MongoCmdOptionsBuilder().useNoJournal(!journal);
+            if (storageEngine != null) {
+                optionsBuilder.useStorageEngine(storageEngine);
+            }
+
             IMongodConfig config = new MongodConfigBuilder()
                     .version(getVersion()).net(new Net(bindIp, port, Network.localhostIsIPv6()))
                     .replication(new Storage(getDataDirectory(), null, 0))
-                    .cmdOptions(new MongoCmdOptionsBuilder()
-                    		.useNoJournal(!journal)
-                    		.build())
+                    .cmdOptions(optionsBuilder.build())
                     .build();
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
