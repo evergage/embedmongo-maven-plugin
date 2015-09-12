@@ -215,6 +215,14 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
     private String storageEngine;
 
     /**
+     * The Wired Tiger collection block compressor to use in MongoDB
+     *
+     * @parameter expression="${embedmongo.wiredTigerCollectionBlockCompressor}"
+     * @since 0.1.14
+     */
+    private String wiredTigerCollectionBlockCompressor;
+
+    /**
      * The maven project.
      * 
      * @parameter expression="${project}"
@@ -272,6 +280,9 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
             MongoCmdOptionsBuilder optionsBuilder = new MongoCmdOptionsBuilder().useNoJournal(!journal);
             if (storageEngine != null) {
                 optionsBuilder.useStorageEngine(storageEngine);
+            }
+            if (wiredTigerCollectionBlockCompressor != null) {
+                optionsBuilder.wiredTigerCollectionBlockCompressor(wiredTigerCollectionBlockCompressor);
             }
 
             IMongodConfig config = new MongodConfigBuilder()
