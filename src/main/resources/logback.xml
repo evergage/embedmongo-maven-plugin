@@ -1,0 +1,21 @@
+<configuration>
+
+    <property name="defaultPattern"
+              value="%-5level %date{ISO8601} %logger{50} %X{apptegicContext} %m%n" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${defaultPattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!-- Suppress "Already removed de.flapdoodle.embed.process.extract.ImmutableExtractedFileSet@3a769aa3 for
+         de.flapdoodle.embed.mongo.distribution.Versions$GenericFeatureAwareVersion@605eda7d:OS_X:B64, emergency shutdown?"
+         warning logged by "stop" goal. -->
+    <logger name="de.flapdoodle.embed.process.store.CachingArtifactStore" level="ERROR" />
+
+</configuration>

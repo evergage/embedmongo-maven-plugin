@@ -15,6 +15,7 @@
  */
 package com.github.joelittlejohn.embedmongo;
 
+import de.flapdoodle.embed.process.extract.ExtractedFileSets;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -45,9 +46,21 @@ public class StopEmbeddedMongoMojo extends AbstractMojo {
             .MONGOD_CONTEXT_PROPERTY_NAME);
 
         if (mongod != null) {
+            // Preload ExtractedFileSets class to prevent NoClassDefFoundError when
+            // de.flapdoodle.embed.process.store.CachingArtifactStore.CacheCleaner thread tries to access the class
+            // after the plugin classloader is no longer the context classloader.
+            loadClass(ExtractedFileSets.class);
             mongod.stop();
         } else {
             throw new MojoFailureException("No mongod process found, it appears embedmongo:start was not called");
+        }
+    }
+
+    private void loadClass(Class clazz) {
+        try {
+            Class.forName(clazz.getName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Failed to load class: " + clazz.getName());
         }
     }
 
