@@ -101,19 +101,13 @@ public abstract class AbstractEmbeddedMongoMojo extends AbstractMojo {
         try {
             return Version.valueOf(versionEnumName);
         } catch (IllegalArgumentException e) {
-            IFeatureAwareVersion nextLowestVersion = findNextLowestPointVersion();
-            if (nextLowestVersion != null) {
-                getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway, and using the config from version " + nextLowestVersion);
-                return nextLowestVersion;
-            } else {
-                getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
-                return Versions.withFeatures(new IVersion() {
-                    @Override
-                    public String asInDownloadPath() {
-                        return version;
-                    }
-                });
-            }
+            getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
+            return Versions.withFeatures(new IVersion() {
+                @Override
+                public String asInDownloadPath() {
+                    return version;
+                }
+            });
         }
     }
 
@@ -124,33 +118,6 @@ public abstract class AbstractEmbeddedMongoMojo extends AbstractMojo {
             versionEnumName = "V" + versionEnumName;
         }
         return versionEnumName;
-    }
-
-    private IFeatureAwareVersion findNextLowestPointVersion() {
-        if (this.version.lastIndexOf(".") >= this.version.length() - 1) {
-            return null;
-        }
-        String initialString = this.version.substring(0, this.version.lastIndexOf("."));
-        String pointVersionString = this.version.substring(this.version.lastIndexOf(".") + 1);
-        Integer pointVersion;
-        try {
-            pointVersion = Integer.valueOf(pointVersionString);
-            getLog().warn("pointVersion: " + pointVersion);
-        } catch (NumberFormatException numberFormatException) {
-            return null;
-        }
-        IFeatureAwareVersion nextLowestPointVersion = null;
-        while (pointVersion > 0) {
-            try {
-                pointVersion--;
-                String nextLowestVersionToTry = getVersionEnumName(initialString + "." + pointVersion.toString());
-                nextLowestPointVersion = Version.valueOf(nextLowestVersionToTry);
-                break;
-            } catch (IllegalArgumentException illegalArgumentException) {
-                // no-op
-            }
-        }
-        return nextLowestPointVersion;
     }
 
     protected Integer getPort() {
